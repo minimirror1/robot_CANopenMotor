@@ -8,6 +8,11 @@ from motor_controller import MotorController
 
 
 import random
+
+# 1 84,303
+# 2 78,500
+# 3 69,238
+# 4 81,038
     
 def is_position_reached(current_pos, target_pos, tolerance=10):
     return abs(current_pos - target_pos) <= tolerance
@@ -18,10 +23,15 @@ def main():
     controller = MotorController(channel='can0', bustype='socketcan', bitrate=1000000)
 
     # 예시: 모터 생성(제조사별)
-    motorA = MotorFactory.create_motor("VendorZeroErr", 1, "config/ZeroErr Driver_V1.5.eds")
-    motorB = MotorFactory.create_motor("VendorZeroErr", 2, "config/ZeroErr Driver_V1.5.eds")
-    motorC = MotorFactory.create_motor("VendorZeroErr", 3, "config/ZeroErr Driver_V1.5.eds")
-    motorD = MotorFactory.create_motor("VendorZeroErr", 4, "config/ZeroErr Driver_V1.5.eds")
+    motorA = MotorFactory.create_motor("VendorZeroErr", 1, "config/ZeroErr Driver_V1.5.eds", zero_offset=84303)
+    motorB = MotorFactory.create_motor("VendorZeroErr", 2, "config/ZeroErr Driver_V1.5.eds", zero_offset=78500)
+    motorC = MotorFactory.create_motor("VendorZeroErr", 3, "config/ZeroErr Driver_V1.5.eds", zero_offset=69238)
+    motorD = MotorFactory.create_motor("VendorZeroErr", 4, "config/ZeroErr Driver_V1.5.eds", zero_offset=81038)
+
+    """motorA = MotorFactory.create_motor("VendorZeroErr", 1, "config/ZeroErr Driver_V1.5.eds", zero_offset=0)
+    motorB = MotorFactory.create_motor("VendorZeroErr", 2, "config/ZeroErr Driver_V1.5.eds", zero_offset=0)
+    motorC = MotorFactory.create_motor("VendorZeroErr", 3, "config/ZeroErr Driver_V1.5.eds", zero_offset=0)
+    motorD = MotorFactory.create_motor("VendorZeroErr", 4, "config/ZeroErr Driver_V1.5.eds", zero_offset=0)"""
     #motorB = MotorFactory.create_motor("VendorB", 2, "vendorB.eds")
 
     # 컨트롤러에 모터 등록
@@ -43,31 +53,42 @@ def main():
     controller.pdo_mapping_all()
 
     # Switch On
-    # controller.set_switchOn_all()
+    controller.set_switchOn_all()
 
     # PDO 콜백 등록
     controller.pdo_callback_register_all()
 
+    controller.sync_start(1)
+
+
+
+    
+
     # 동기화 시작
-    controller.sync_start()
+    controller.sync_start(0.01)
     
     # 위치 설정
-    """
-    controller.set_position_all(50000)
     
-        # 위치 읽기
+    controller.set_position_all(0)
+
+    time.sleep(5)
+    
+    """
+    # 위치 읽기
     for i in range(30):
         positions = controller.get_positions()
         print("Current positions:", positions)
         time.sleep(0.2) 
 
     controller.set_position_all(0)
-    
+    """
+
+    """
     # 위치 읽기
     for i in range(30):
         positions = controller.get_positions()
         print("Current positions:", positions)
-        time.sleep(0.2) """
+        time.sleep(0.2) 
     
     # 랜덤 위치 설정
     try:
@@ -96,8 +117,8 @@ def main():
                 
     except KeyboardInterrupt:
         print("\n프로그램을 종료합니다...")
-
-
+    """
+    
     
     # 종료 전 네트워크 해제
     controller.disconnect()

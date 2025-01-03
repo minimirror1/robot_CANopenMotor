@@ -2,8 +2,8 @@ from abstract_motor import AbstractMotor
 import time
 class MotorVendorZeroErr(AbstractMotor):
     """제조사 A 모터에 대한 구체 구현."""
-    def __init__(self, node_id, eds_path):
-        super().__init__(node_id, eds_path)
+    def __init__(self, node_id, eds_path, zero_offset=0):
+        super().__init__(node_id, eds_path, zero_offset)
         
     def init(self):
         # 모터 초기화
@@ -49,13 +49,15 @@ class MotorVendorZeroErr(AbstractMotor):
         self.node.tpdo[1].clear()
         self.node.tpdo[1].add_variable('Statusword')
         self.node.tpdo[1].add_variable('Position actual value')
-        self.node.tpdo[1].trans_type = 0
+        self.node.tpdo[1].cob_id = 0x180 + self.node_id
+        self.node.tpdo[1].trans_type = 1
         self.node.tpdo[1].event_timer = 0
         self.node.tpdo[1].enabled = True
 
         self.node.rpdo[1].clear()
         self.node.rpdo[1].add_variable('Controlword')
         self.node.rpdo[1].add_variable('Target Position')
+        self.node.rpdo[1].cob_id = 0x200 + self.node_id
         self.node.rpdo[1].trans_type = 0  # 즉시 적용
         #self.node.rpdo[1].event_timer = 255   # 이벤트 타이머 비활성화
         self.node.rpdo[1].enabled = True
@@ -73,7 +75,7 @@ class MotorVendorZeroErr(AbstractMotor):
 
     def set_switchOn(self):
         print(f"[MotorVendorZeroErr] Set switch on, node: {self.node_id}")
-        self.node.rpdo[1]['Controlword'].phys = 0x26
+        """self.node.rpdo[1]['Controlword'].phys = 0x26
         self.node.rpdo[1].transmit()  # start() 대신 transmit() 사용    
         self.network.sync.transmit()
 
@@ -83,12 +85,18 @@ class MotorVendorZeroErr(AbstractMotor):
 
         self.node.rpdo[1]['Controlword'].phys = 0x2f
         self.node.rpdo[1].transmit()
-        self.network.sync.transmit()
-
-        """        self.node.rpdo[1]['Controlword'].phys = 0x3f
-        self.node.rpdo[1]['Target Position'].phys = self.get_position()
+        self.network.sync.transmit()"""
+        
+        time.sleep(0.001)
+        self.node.rpdo[1]['Controlword'].phys = 0x2f
+        self.node.rpdo[1]['Target Position'].phys = self.node.sdo['Position actual value'].raw
         self.node.rpdo[1].transmit()
-        self.network.sync.transmit()  """      
+        time.sleep(0.001)
+
+        self.node.rpdo[1]['Controlword'].phys = 0x3f
+        self.node.rpdo[1].transmit()        
+        time.sleep(0.001)
+
         pass
 
     def pdo_callback_register(self):
@@ -98,9 +106,12 @@ class MotorVendorZeroErr(AbstractMotor):
     def set_position(self, value):
         print(f"[MotorVendorZeroErr] Set position to {value}, node: {self.node_id}")
         self.node.rpdo[1]['Controlword'].phys = 0x2f
-        self.node.rpdo[1]['Target Position'].phys = value
+        self.target_position = value + self.zero_offset
+        self.node.rpdo[1]['Target Position'].phys = self.target_position
         self.node.rpdo[1].transmit()
-        
+
+        print(f"myzero_offset {self.zero_offset} , target_position {self.target_position}")
+
         self.node.rpdo[1]['Controlword'].phys = 0x3f
         self.node.rpdo[1].transmit()        
         pass
@@ -114,5 +125,5 @@ class MotorVendorZeroErr(AbstractMotor):
         position = message.data[2] | (message.data[3] << 8) | (message.data[4] << 16) | (message.data[5] << 24)
         if position & 0x80000000:  # 최상위 비트가 1이면 음수
             position = -((~position + 1) & 0xFFFFFFFF)  # 2의 보수 처리
-        self.current_position = position
+        self.current_position = position - self.zero_offset
         #print(f'TPDO1 Position actual value: {position}')
