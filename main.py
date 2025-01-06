@@ -118,7 +118,47 @@ def main():
     except KeyboardInterrupt:
         print("\n프로그램을 종료합니다...")
     """
-    
+
+
+    # 랜덤 모터 위치 제어
+    try:
+        motor_sel_cnt = 1  # 선택할 모터 개수 초기화
+        
+        while True:
+            # 모터 선택 개수 업데이트
+            selected_motors = random.sample(range(1, 5), motor_sel_cnt)
+            # 랜덤 목표 위치 생성
+            target_position = random.randint(0, 524288)
+            
+            print(f"\n선택된 모터 개수: {motor_sel_cnt}")
+            print(f"선택된 모터: {selected_motors}, 목표 위치: {target_position}")
+            
+            # 선택된 모터들 이동
+            for motor_id in selected_motors:
+                controller.motors[motor_id].set_position(target_position)
+            
+            # 두든 선택된 모터가 목표 위치에 도달할 때까지 모니터링
+            while True:
+                all_reached = True
+                for motor_id in selected_motors:
+                    current_position = controller.motors[motor_id].get_position()
+                    print(f"모터 {motor_id} 현재 위치: {current_position}")
+                    if not is_position_reached(current_position, target_position):
+                        all_reached = False
+                
+                if all_reached:
+                    print(f"모터 {selected_motors}가 목표 위치에 도달했습니다!")
+                    break
+                    
+                time.sleep(0.2)
+            
+            # 다음 루프를 위해 모터 선택 개수 증가
+            motor_sel_cnt += 1
+            if motor_sel_cnt > 4:
+                motor_sel_cnt = 1
+                
+    except KeyboardInterrupt:
+        print("\n프로그램을 종료합니다...")
     
     # 종료 전 네트워크 해제
     controller.disconnect()
