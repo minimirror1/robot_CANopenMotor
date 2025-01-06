@@ -32,6 +32,15 @@ class AbstractMotor(ABC):
     def set_switchOn(self):
         """Switch On 명령"""
         pass
+
+    def set_zero_offset(self, value):
+        """Zero Offset 변경"""
+        self.zero_offset = value
+        pass
+
+    def get_zero_offset(self):
+        """Zero Offset 조회"""
+        return self.zero_offset
     
     @abstractmethod
     def pdo_callback_register(self):
