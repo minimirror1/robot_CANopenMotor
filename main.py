@@ -1,6 +1,6 @@
 import canopen
 import time
-
+import math
 from abstract_motor import AbstractMotor
 
 from motor_factory import MotorFactory
@@ -13,10 +13,24 @@ import random
 # 2 78,500
 # 3 69,238
 # 4 81,038
+
+def get_wave_data(current_time):
+    # frequency: Hz (주파수)
+    # amplitude: 진폭
+    # offset: 오프셋
+    frequency = 0.1  # 60Hz
+    amplitude = 50000
+    offset = 0
+    
+    # 실시간으로 사인파 계산
+    # 2π * frequency * time => 각속도 * 시간
+    current_value = amplitude * math.sin(2 * math.pi * frequency * current_time) + offset
+    return int(current_value)
+    
+    
     
 def is_position_reached(current_pos, target_pos, tolerance=10):
     return abs(current_pos - target_pos) <= tolerance
-
 
 def main():
     # 예시: CAN Bus controller 생성
@@ -71,7 +85,20 @@ def main():
     
     controller.set_position_all(0)
 
-    time.sleep(5)
+    # time.sleep(5)
+
+    current_time = 0
+    try:
+        while True:
+            current_time = current_time + 0.01
+            current_value = get_wave_data(current_time)
+            # 모든 모터에 현재 파형 값을 위치로 설정
+            controller.set_position_all(int(current_value))
+            print(f"Current position: {current_value}, time: {current_time}")
+            time.sleep(0.01)  # time_step(0.01초) 만큼 대기
+
+    except KeyboardInterrupt:
+        print("\n프로그램을 종료합니다...")
     
     """
     # 위치 읽기
@@ -119,7 +146,7 @@ def main():
         print("\n프로그램을 종료합니다...")
     """
 
-
+    """
     # 랜덤 모터 위치 제어
     try:
         motor_sel_cnt = 1  # 선택할 모터 개수 초기화
@@ -159,6 +186,8 @@ def main():
                 
     except KeyboardInterrupt:
         print("\n프로그램을 종료합니다...")
+
+    """
     
     # 종료 전 네트워크 해제
     controller.disconnect()
