@@ -1,6 +1,7 @@
 import canopen
 import time
 from abstract_motor import AbstractMotor
+from control.admittance_controller import AdmittanceController
 
 class MotorController:
     """
@@ -17,6 +18,12 @@ class MotorController:
         self.network.connect(channel=channel, bustype=bustype, bitrate=bitrate)
         # 등록된 모터 리스트/딕셔너리
         self.motors = {}
+
+        self.admittance = AdmittanceController(mass=1.0, damping=10.0, stiffness=100.0)
+        
+    def update_admittance_control(self, node_id, force, dt):
+        target_pos = self.admittance.compute(force, dt, self.get_position(node_id), self.get_velocity(node_id))
+        self.set_position(node_id, target_pos) 
 
     def add_motor(self, motor: AbstractMotor):
         """MotorController가 관리할 모터를 추가한다."""
@@ -98,6 +105,30 @@ class MotorController:
     def set_position(self, node_id, value):
         if node_id in self.motors:
             self.motors[node_id].set_position(value)
+        else:
+            print(f"Node {node_id} not found in motors dictionary.")
+
+    def get_position(self, node_id):
+        if node_id in self.motors:
+            return self.motors[node_id].get_position()
+        else:
+            print(f"Node {node_id} not found in motors dictionary.")
+
+    def get_torque(self, node_id):
+        if node_id in self.motors:
+            return self.motors[node_id].get_torque()
+        else:
+            print(f"Node {node_id} not found in motors dictionary.")
+    
+    def get_velocity(self, node_id):
+        if node_id in self.motors:
+            return self.motors[node_id].get_velocity()
+        else:
+            print(f"Node {node_id} not found in motors dictionary.")
+    
+    def get_acceleration(self, node_id):
+        if node_id in self.motors:
+            return self.motors[node_id].get_acceleration()
         else:
             print(f"Node {node_id} not found in motors dictionary.")
 

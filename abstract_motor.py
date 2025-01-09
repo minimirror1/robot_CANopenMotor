@@ -57,6 +57,18 @@ class AbstractMotor(ABC):
         """모터 위치 확인"""
         pass
 
+    def get_torque(self):
+        """모터 토크 확인"""
+        pass
+
+    def get_velocity(self):
+        """모터 속도 확인"""
+        pass
+
+    def get_acceleration(self):
+        """모터 가속도 확인"""
+        pass
+
     @abstractmethod
     def tpdo1_callback(self, message):
         """TPDO1 콜백 함수"""

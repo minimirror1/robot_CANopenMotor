@@ -120,6 +120,14 @@ class MotorVendorZeroErr(AbstractMotor):
         # self.current_position = self.node.sdo['Position actual value'].raw
         # print(f"[MotorVendorZeroErr] Get position, node: {self.node_id}, position: {self.current_position}")
         return self.current_position
+    
+    def get_torque(self):
+        """모터 토크 확인"""
+        return self.node.sdo['Torque sensor'].raw
+
+    def get_velocity(self):
+        """모터 속도 확인"""
+        return self.node.sdo['Velocity actual value'].raw
 
     def tpdo1_callback(self, message):
         position = message.data[2] | (message.data[3] << 8) | (message.data[4] << 16) | (message.data[5] << 24)
