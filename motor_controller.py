@@ -112,3 +112,46 @@ class MotorController:
         """네트워크 해제"""
         self.network.sync.stop()
         self.network.disconnect()
+
+    def set_impedance_all(self, stiffness, damping):
+        """등록된 모든 모터에 임피던스 제어 파라미터를 설정"""
+        for node_id, motor in self.motors.items():
+            motor.set_impedance(stiffness, damping)
+    
+    def set_impedance(self, node_id, stiffness, damping):
+        """특정 모터에 임피던스 제어 파라미터를 설정"""
+        if node_id in self.motors:
+            self.motors[node_id].set_impedance(stiffness, damping)
+        else:
+            print(f"Node {node_id} not found in motors dictionary.")
+
+    def set_torque_all(self, torque):
+        """등록된 모든 모터에 토크값을 설정"""
+        for node_id, motor in self.motors.items():
+            motor.set_torque(torque)
+    
+    def set_torque(self, node_id, torque):
+        """특정 모터에 토크값을 설정"""
+        if node_id in self.motors:
+            self.motors[node_id].set_torque(torque)
+        else:
+            print(f"Node {node_id} not found in motors dictionary.")
+
+    def get_torques(self):
+        """등록된 모든 모터의 현재 토크값을 dict로 반환"""
+        torques = {}
+        for node_id, motor in self.motors.items():
+            torques[node_id] = motor.get_torque()
+        return torques
+
+    def enable_impedance_mode_all(self):
+        """등록된 모든 모터의 임피던스 제어 모드를 활성화"""
+        for node_id, motor in self.motors.items():
+            motor.enable_impedance_mode()
+
+    def enable_impedance_mode(self, node_id):
+        """특정 모터의 임피던스 제어 모드를 활성화"""
+        if node_id in self.motors:
+            self.motors[node_id].enable_impedance_mode()
+        else:
+            print(f"Node {node_id} not found in motors dictionary.")
