@@ -71,13 +71,7 @@ def main():
 
     # PDO 콜백 등록
     controller.pdo_callback_register_all()
-
-    controller.sync_start(1)
-
-
-
-    
-
+   
     # 동기화 시작
     controller.sync_start(0.01)
     

@@ -31,6 +31,27 @@ class MotorController:
         # node.sdo.PAUSE_BEFORE_SEND = 5
         self.motors[motor.node_id] = motor
 
+    def all_motors_init_start(self, interval=0.01):
+            # 리셋
+        self.reset_all()
+        #time.sleep(3) 
+        
+        # 모터 전체 초기화
+        self.init_all()
+        #time.sleep(3) 
+        
+        # PDO 매핑
+        self.pdo_mapping_all()
+
+        # Switch On
+        self.set_switchOn_all()
+
+        # PDO 콜백 등록
+        self.pdo_callback_register_all()
+    
+        # 동기화 시작
+        self.sync_start(interval)
+
     def init_all(self):
         """등록된 모든 모터를 초기화"""
         for node_id, motor in self.motors.items():
