@@ -13,6 +13,9 @@ class AbstractMotor(ABC):
         self.target_position = 0  # 목표 위치값 저장용 변수
         self.current_position = 0  # 현재 위치값 저장용 변수
 
+        self.current_torque = 0
+        self.current_velocity = 0
+
     @abstractmethod
     def init(self):
         """모터 초기화 절차"""

@@ -35,6 +35,7 @@ def run_admittance_control():
         
         start_time = time.time()
         while time.time() - start_time < duration:
+
             # 토크 읽기 및 단위 변환 (mN.m -> N.m)
             external_force = controller.get_torque(motor.node_id) / 1000.0
             

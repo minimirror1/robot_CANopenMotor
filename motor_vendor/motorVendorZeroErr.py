@@ -15,15 +15,15 @@ class MotorVendorZeroErr(AbstractMotor):
         print(f'[read] Modes of operation display: {self.ModeOfOperationDisplay}')
 
         # Profile velocity
-        self.node.sdo['Profile velocity'].raw = 100000
+        self.node.sdo['Profile velocity'].raw = 262144
         print(f'[write] Profile velocity: 262144')
 
         # Profile acceleration
-        self.node.sdo['Profile acceleration'].raw = 100000
+        self.node.sdo['Profile acceleration'].raw = 262144
         print(f'[write] Profile acceleration: 262144')
 
         # Profile deceleration
-        self.node.sdo['Profile deceleration'].raw = 100000
+        self.node.sdo['Profile deceleration'].raw = 262144
         print(f'[write] Profile deceleration: 262144')
 
         # Disable sync
@@ -54,6 +54,14 @@ class MotorVendorZeroErr(AbstractMotor):
         self.node.tpdo[1].event_timer = 0
         self.node.tpdo[1].enabled = True
 
+        self.node.tpdo[2].clear()
+        self.node.tpdo[2].add_variable('Torque sensor')
+        self.node.tpdo[2].add_variable('Velocity actual value')
+        self.node.tpdo[2].cob_id = 0x300 + self.node_id
+        self.node.tpdo[2].trans_type = 1
+        self.node.tpdo[2].event_timer = 0
+        self.node.tpdo[2].enabled = True
+
         self.node.rpdo[1].clear()
         self.node.rpdo[1].add_variable('Controlword')
         self.node.rpdo[1].add_variable('Target Position')
@@ -61,6 +69,8 @@ class MotorVendorZeroErr(AbstractMotor):
         self.node.rpdo[1].trans_type = 0  # 즉시 적용
         #self.node.rpdo[1].event_timer = 255   # 이벤트 타이머 비활성화
         self.node.rpdo[1].enabled = True
+
+
         
         # Save new configuration (node must be in pre-operational)
         self.node.nmt.state = 'PRE-OPERATIONAL'
@@ -103,6 +113,9 @@ class MotorVendorZeroErr(AbstractMotor):
         self.network.subscribe(self.node.tpdo[1].cob_id, self.node.tpdo[1].on_message)
         self.node.tpdo[1].add_callback(self.tpdo1_callback)
 
+        self.network.subscribe(self.node.tpdo[2].cob_id, self.node.tpdo[2].on_message)
+        self.node.tpdo[2].add_callback(self.tpdo2_callback)
+
     def set_position(self, value):
         print(f"[MotorVendorZeroErr] Set position to {value}, node: {self.node_id}")
         self.node.rpdo[1]['Controlword'].phys = 0x2f
@@ -123,11 +136,12 @@ class MotorVendorZeroErr(AbstractMotor):
     
     def get_torque(self):
         """모터 토크 확인"""
-        return self.node.sdo['Torque sensor'].raw
-
+        #return self.node.sdo['Torque sensor'].raw
+        return self.current_torque
     def get_velocity(self):
         """모터 속도 확인"""
-        return self.node.sdo['Velocity actual value'].raw
+        #return self.node.sdo['Velocity actual value'].raw
+        return self.current_velocity
 
     def tpdo1_callback(self, message):
         position = message.data[2] | (message.data[3] << 8) | (message.data[4] << 16) | (message.data[5] << 24)
@@ -135,3 +149,21 @@ class MotorVendorZeroErr(AbstractMotor):
             position = -((~position + 1) & 0xFFFFFFFF)  # 2의 보수 처리
         self.current_position = position - self.zero_offset
         #print(f'TPDO1 Position actual value: {position}')
+
+    def tpdo2_callback(self, message):
+        # Torque sensor 값 처리 (첫 번째 4바이트)
+        torque = message.data[0] | (message.data[1] << 8) | (message.data[2] << 16) | (message.data[3] << 24)
+        if torque & 0x80000000:  # 음수 처리
+            torque = -((~torque + 1) & 0xFFFFFFFF)
+        self.current_torque = torque
+
+        # Velocity actual value 처리 (다음 4바이트)
+        velocity = message.data[4] | (message.data[5] << 8) | (message.data[6] << 16) | (message.data[7] << 24)
+        if velocity & 0x80000000:  # 음수 처리
+            velocity = -((~velocity + 1) & 0xFFFFFFFF)
+        self.current_velocity = velocity
+
+        #print(f'TPDO2 Torque sensor: {torque}, Velocity actual value: {velocity}')
+
+        
+        
