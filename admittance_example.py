@@ -23,11 +23,14 @@ def run_admittance_control():
     
     # 어드미턴스 제어 파라미터 조정
     controller.admittance.M = 0.005  # 가상 질량 [kg⋅m²]
-    controller.admittance.B = 0.1    # 댐핑 [N⋅m⋅s/rad]
-    controller.admittance.K = 2.0   # 강성 [N⋅m/rad]
+    controller.admittance.B = 0.005    # 댐핑 [N⋅m⋅s/rad]
+    controller.admittance.K = 30.0   # 강성 [N⋅m/rad]
     
     dt = 0.01  # 제어 주기 [s]
     duration = 600.0  # 실행 시간 [s]
+
+    # 로깅 시작
+    #motor.enable_torque_logging(True)
     
     try:
         # 동기 통신 시작
@@ -62,7 +65,9 @@ def run_admittance_control():
     
     finally:
         # 정리
+        #motor.enable_torque_logging(False)
         controller.disconnect()
+        
         print("프로그램 종료")
 
 if __name__ == "__main__":
