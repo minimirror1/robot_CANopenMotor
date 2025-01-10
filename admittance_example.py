@@ -16,14 +16,15 @@ def run_admittance_control():
     controller.set_switchOn_all()
     controller.pdo_callback_register_all()
     
-    controller.admittance.M = 0.1
-    controller.admittance.B = 2   
-    controller.admittance.K = 10.0
+    # 엔코더 카운트 -> 라디안 변환 계수
+    COUNTS_PER_REV = 524288
+    COUNTS_TO_RAD = 2 * np.pi / COUNTS_PER_REV
+    RAD_TO_COUNTS = COUNTS_PER_REV / (2 * np.pi)
     
-    # 어드미턴스 제어 파라미터
-    mass = 0.1       # 가상 질량 [kg]
-    damping = 2.0    # 댐핑 계수 [Ns/m]
-    stiffness = 10.0 # 강성 계수 [N/m]
+    # 어드미턴스 제어 파라미터 조정
+    controller.admittance.M = 0.005  # 가상 질량 [kg⋅m²]
+    controller.admittance.B = 0.1    # 댐핑 [N⋅m⋅s/rad]
+    controller.admittance.K = 2.0   # 강성 [N⋅m/rad]
     
     dt = 0.01  # 제어 주기 [s]
     duration = 600.0  # 실행 시간 [s]
@@ -34,15 +35,24 @@ def run_admittance_control():
         
         start_time = time.time()
         while time.time() - start_time < duration:
-            # 가상의 외력 생성 (실제로는 센서에서 읽어와야 함)
-            # t = time.time() - start_time
-            # external_force = 100000.0 * np.sin(2 * np.pi * 0.5 * t)  # 10N 진폭, 0.5Hz 사인파
+            # 토크 읽기 및 단위 변환 (mN.m -> N.m)
+            external_force = controller.get_torque(motor.node_id) / 1000.0
             
-            external_force = controller.get_torque(motor.node_id) / 1000.0  # mN.m를 N.m로 변환
-            print(f"Torque: {external_force:.3f} N.m")
+            # 현재 위치와 속도 읽기 (엔코더 카운트)
+            current_pos_counts = controller.get_position(motor.node_id)
+            current_vel_counts = controller.get_velocity(motor.node_id)
             
-            # 어드미턴스 제어 실행
-            controller.update_admittance_control(motor.node_id, external_force, dt)
+            # 어드미턴스 제어 실행 (내부적으로 라디안 변환 처리)
+            target_pos_counts = controller.admittance.compute(
+                external_force, dt, current_pos_counts, current_vel_counts)
+            
+            # 목표 위치 설정
+            controller.set_position(motor.node_id, target_pos_counts)
+            
+            # 현재 상태 출력 (라디안과 카운트 모두 표시)
+            current_pos_rad = current_pos_counts * controller.admittance.COUNTS_TO_RAD
+            print(f"Torque: {external_force:.3f} N.m, "
+                  f"Position: {current_pos_rad:.3f} rad ({current_pos_counts} counts)")
             
             time.sleep(dt)
             
