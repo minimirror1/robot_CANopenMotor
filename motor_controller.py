@@ -89,6 +89,9 @@ class MotorController:
 
     def sync_start(self, interval=0.01):
         self.network.sync.start(interval) # 10ms
+        for node_id, motor in self.motors.items():
+            motor.set_dt(interval)
+        
 
     def set_position_all(self, value):
         """등록된 모든 모터에 동일 위치를 세팅"""
@@ -107,6 +110,26 @@ class MotorController:
         for node_id, motor in self.motors.items():
             positions[node_id] = motor.get_position()
         return positions
+    
+    def set_torque_all(self, value):
+        for node_id, motor in self.motors.items():
+            motor.set_torque(value)
+
+    def set_torque(self, node_id, value):
+        if node_id in self.motors:
+            self.motors[node_id].set_torque(value)
+        else:
+            print(f"Node {node_id} not found in motors dictionary.")
+
+    def get_torque_all(self):
+        for node_id, motor in self.motors.items():
+            motor.get_torque()
+
+    def get_torque(self, node_id):
+        if node_id in self.motors:
+            return self.motors[node_id].get_torque()
+        else:
+            print(f"Node {node_id} not found in motors dictionary.")
 
     def disconnect(self):
         """네트워크 해제"""

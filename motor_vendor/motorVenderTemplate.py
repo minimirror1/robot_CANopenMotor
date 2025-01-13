@@ -2,8 +2,8 @@ from abstract_motor import AbstractMotor
 
 class MotorVendorB(AbstractMotor):
     """제조사 B 모터에 대한 구체 구현."""
-    def __init__(self, node_id, eds_path):
-        super().__init__(node_id, eds_path)
+    def __init__(self, node_id, eds_path, zero_offset=0, operation_mode='PROFILE_POSITION'):
+        super().__init__(node_id, eds_path, zero_offset, operation_mode)
 
     def init(self):
         print(f"[VendorB] Init motor node: {self.node_id}")
