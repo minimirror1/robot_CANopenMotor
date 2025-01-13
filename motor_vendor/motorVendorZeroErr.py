@@ -15,15 +15,15 @@ class MotorVendorZeroErr(AbstractMotor):
         print(f'[read] Modes of operation display: {self.ModeOfOperationDisplay}')
 
         # Profile velocity
-        self.node.sdo['Profile velocity'].raw = 100000
+        self.node.sdo['Profile velocity'].raw = 262144
         print(f'[write] Profile velocity: 262144')
 
         # Profile acceleration
-        self.node.sdo['Profile acceleration'].raw = 100000
+        self.node.sdo['Profile acceleration'].raw = 262144
         print(f'[write] Profile acceleration: 262144')
 
         # Profile deceleration
-        self.node.sdo['Profile deceleration'].raw = 100000
+        self.node.sdo['Profile deceleration'].raw = 262144
         print(f'[write] Profile deceleration: 262144')
 
         # Disable sync
