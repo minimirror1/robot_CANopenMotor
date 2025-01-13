@@ -80,9 +80,16 @@ def main():
 
     # controller.set_torque(1, 500)
     controller.set_torque(1, 250)
+    cnt = 0
     try:
         while True:
             time.sleep(0.01)
+            
+            if cnt % 100 == 0:
+                print(f"Torque: {controller.get_torque(1)}")
+                print(f"Velocity: {controller.get_velocity(1)}")
+                print(f"Acceleration: {controller.get_acceleration(1)}")
+            cnt += 1
     except KeyboardInterrupt:
         controller.set_torque(1, 0)
         print("\n프로그램을 종료합니다...")

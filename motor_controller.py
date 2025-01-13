@@ -131,6 +131,18 @@ class MotorController:
         else:
             print(f"Node {node_id} not found in motors dictionary.")
 
+    def get_velocity(self, node_id):
+        if node_id in self.motors:
+            return self.motors[node_id].get_velocity()
+        else:
+            print(f"Node {node_id} not found in motors dictionary.")
+
+    def get_acceleration(self, node_id):
+        if node_id in self.motors:
+            return self.motors[node_id].get_acceleration()
+        else:
+            print(f"Node {node_id} not found in motors dictionary.")
+
     def disconnect(self):
         """네트워크 해제"""
         self.network.sync.stop()
