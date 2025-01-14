@@ -197,17 +197,22 @@ class MotorVendorZeroErr(AbstractMotor):
         return self.current_acceleration
 
     def tpdo1_callback(self, message):
-        position = message.data[2] | (message.data[3] << 8) | (message.data[4] << 16) | (message.data[5] << 24)
-        if position & 0x80000000:  # 최상위 비트가 1이면 음수
-            position = -((~position + 1) & 0xFFFFFFFF)  # 2의 보수 처리
+        #position = message.data[2] | (message.data[3] << 8) | (message.data[4] << 16) | (message.data[5] << 24)
+        #if position & 0x80000000:  # 최상위 비트가 1이면 음수
+        #    position = -((~position + 1) & 0xFFFFFFFF)  # 2의 보수 처리
+        position = int.from_bytes(message.data[2:5], byteorder='little', signed=True)
         self.current_position = (position - self.zero_offset) * self.plusToRad  # rad로 변환
         #print(f'TPDO1 Position actual value: {self.current_position}')
 
     def tpdo2_callback(self, message):
-        self.current_torque_sensor = (message.data[0] | (message.data[1] << 8) | (message.data[2] << 16) | (message.data[3] << 24)) / 1000
+        current_torque = int.from_bytes(message.data[0:3], byteorder='little', signed=True)  
+
+        self.current_torque_sensor = current_torque / 1000        
         #print(f'TPDO2 Torque sensor: {self.current_torque_sensor}')
-        
-        pulse_velocity = message.data[4] | (message.data[5] << 8) | (message.data[6] << 16) | (message.data[7] << 24)
+
+
+        pulse_velocity = int.from_bytes(message.data[4:7], byteorder='little', signed=True)
+
         self.current_velocity = pulse_velocity * self.plusToRad  # rad/s로 변환
         #print(f'TPDO2 Velocity actual value: {self.current_velocity} rad/s')
         

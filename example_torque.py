@@ -79,7 +79,7 @@ def main():
     # time.sleep(5)
 
     # controller.set_torque(1, 500)
-    controller.set_torque(1, 250)
+    controller.set_torque(1, 200)
     cnt = 0
     try:
         while True:
