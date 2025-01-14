@@ -1,10 +1,10 @@
 import canopen
 import time
 import math
-from abstract_motor import AbstractMotor
+from motor_management.abstract_motor import AbstractMotor
 
 from motor_factory import MotorFactory
-from motor_controller import MotorController
+from motor_management.motor_controller import MotorController
 
 
 import random

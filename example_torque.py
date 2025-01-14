@@ -1,10 +1,10 @@
 import canopen
 import time
 import math
-from abstract_motor import AbstractMotor
+from motor_management.abstract_motor import AbstractMotor
 
 from motor_factory import MotorFactory
-from motor_controller import MotorController
+from motor_management.motor_controller import MotorController
 
 
 import random
@@ -17,7 +17,7 @@ TEST_ID = 1
 # 4 81,038
 
 def get_wave_data(current_time):
-    # frequency: Hz (주파수)
+    # frequency: Hz (주파수)s
     # amplitude: 진폭
     # offset: 오프셋
     frequency = 0.1  # 60Hz
