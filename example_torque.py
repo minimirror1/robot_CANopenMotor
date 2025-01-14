@@ -40,23 +40,11 @@ def main():
     #controller = MotorController(interface='slcan', channel='COM3', bitrate=1000000)
 
     # 예시: 모터 생성(제조사별)
-    motorA = MotorFactory.create_motor("VendorZeroErr", TEST_ID, "config/ZeroErr Driver_V1.5.eds", zero_offset=84303, operation_mode='PROFILE_TORQUE')
-    #motorB = MotorFactory.create_motor("VendorZeroErr", 2, "config/ZeroErr Driver_V1.5.eds", zero_offset=78500, operation_mode='PROFILE_POSITION')
-    #motorC = MotorFactory.create_motor("VendorZeroErr", 3, "config/ZeroErr Driver_V1.5.eds", zero_offset=69238, operation_mode='PROFILE_POSITION')
-    #motorD = MotorFactory.create_motor("VendorZeroErr", 4, "config/ZeroErr Driver_V1.5.eds", zero_offset=81038)
-
-    """motorA = MotorFactory.create_motor("VendorZeroErr", 1, "config/ZeroErr Driver_V1.5.eds", zero_offset=0)
-    motorB = MotorFactory.create_motor("VendorZeroErr", 2, "config/ZeroErr Driver_V1.5.eds", zero_offset=0)
-    motorC = MotorFactory.create_motor("VendorZeroErr", 3, "config/ZeroErr Driver_V1.5.eds", zero_offset=0)
-    motorD = MotorFactory.create_motor("VendorZeroErr", 4, "config/ZeroErr Driver_V1.5.eds", zero_offset=0)"""
-    #motorB = MotorFactory.create_motor("VendorB", 2, "vendorB.eds")
-
+    #motorA = MotorFactory.create_motor("VendorZeroErr", TEST_ID, "config/ZeroErr Driver_V1.5.eds", zero_offset=84303, operation_mode='PROFILE_TORQUE')
+    motorA = MotorFactory.create_motor("VendorZeroErr", TEST_ID, "config/ZeroErr Driver_V1.5.eds", zero_offset=84303, operation_mode='PROFILE_POSITION')
+    
     # 컨트롤러에 모터 등록
     controller.add_motor(motorA)
-    #controller.add_motor(motorB)
-    #controller.add_motor(motorC)
-    #controller.add_motor(motorD)
-    #time.sleep(3) 
     
     # 리셋
     controller.reset_all()    
@@ -80,11 +68,16 @@ def main():
     controller.log_start(TEST_ID)
     
     # 토크 설정
-    controller.set_torque(TEST_ID, 200)
+    #controller.set_torque(TEST_ID, 200)
+    controller.set_position(TEST_ID, 0)
     cnt = 0
     try:
         while True:
             time.sleep(0.01)
+
+            current_time = cnt * 0.01
+            current_value = get_wave_data(current_time)
+            controller.set_position(TEST_ID, int(current_value))
             
             if cnt % 100 == 0:
                 print(f"Torque: {controller.get_torque(TEST_ID)}")
@@ -92,7 +85,7 @@ def main():
                 print(f"Acceleration: {controller.get_acceleration(TEST_ID)}")
             cnt += 1
     except KeyboardInterrupt:
-        controller.set_torque(TEST_ID, 0)
+        #controller.set_torque(TEST_ID, 0)
         # 로그 기록 종료
         controller.log_stop(TEST_ID)
         print("\n프로그램을 종료합니다...")

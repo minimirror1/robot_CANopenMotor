@@ -86,63 +86,52 @@ class MotorVendorZeroErr(AbstractMotor):
         self.node.tpdo.read()
         self.node.rpdo.read()
 
-        if self.operation_mode == 'PROFILE_POSITION':
+        # master <- motor
+        # 읽기 : 상태 값, 토크 센서 값
+        self.node.tpdo[1].clear()
+        self.node.tpdo[1].add_variable('Statusword')
+        self.node.tpdo[1].add_variable('Position actual value')
+        self.node.tpdo[1].cob_id = 0x180 + self.node_id
+        self.node.tpdo[1].trans_type = 1
+        self.node.tpdo[1].event_timer = 0
+        self.node.tpdo[1].enabled = True
 
-            self.node.tpdo[1].clear()
-            self.node.tpdo[1].add_variable('Statusword')
-            self.node.tpdo[1].add_variable('Position actual value')
-            self.node.tpdo[1].cob_id = 0x180 + self.node_id
-            self.node.tpdo[1].trans_type = 1
-            self.node.tpdo[1].event_timer = 0
-            self.node.tpdo[1].enabled = True
+        # 읽기 : 속도, 위치
+        self.node.tpdo[2].clear()
+        self.node.tpdo[2].add_variable('Torque sensor') #0x3B69, mN.m
+        self.node.tpdo[2].add_variable('Velocity actual value') #0x606C, plus/s            
+        self.node.tpdo[2].cob_id = 0x280 + self.node_id
+        self.node.tpdo[2].trans_type = 1
+        self.node.tpdo[2].event_timer = 0
+        self.node.tpdo[2].enabled = True
 
-            self.node.rpdo[1].clear()
-            self.node.rpdo[1].add_variable('Controlword')
-            self.node.rpdo[1].add_variable('Target Position')
-            self.node.rpdo[1].cob_id = 0x200 + self.node_id
-            self.node.rpdo[1].trans_type = 0  # 즉시 적용
-            #self.node.rpdo[1].event_timer = 255   # 이벤트 타이머 비활성화
-            self.node.rpdo[1].enabled = True
+        # motor <- master
+        # 쓰기 : 위치 목표값
+        self.node.rpdo[1].clear()
+        self.node.rpdo[1].add_variable('Controlword')
+        self.node.rpdo[1].add_variable('Target Position')
+        self.node.rpdo[1].cob_id = 0x200 + self.node_id
+        self.node.rpdo[1].trans_type = 0  # 즉시 적용
+        #self.node.rpdo[1].event_timer = 255   # 이벤트 타이머 비활성화
+        self.node.rpdo[1].enabled = True
 
-        elif self.operation_mode == 'PROFILE_TORQUE':
-            # master <- motor
-            # 읽기 : 상태 값, 토크 센서 값
-            self.node.tpdo[1].clear()
-            self.node.tpdo[1].add_variable('Statusword')
-            self.node.tpdo[1].add_variable('Position actual value') #0x6064, puls
-            self.node.tpdo[1].cob_id = 0x180 + self.node_id
-            self.node.tpdo[1].trans_type = 1
-            self.node.tpdo[1].event_timer = 0
-            self.node.tpdo[1].enabled = True
-            # 읽기 : 속도, 위치
-            self.node.tpdo[2].clear()
-            self.node.tpdo[2].add_variable('Torque sensor') #0x3B69, mN.m
-            self.node.tpdo[2].add_variable('Velocity actual value') #0x606C, plus/s            
-            self.node.tpdo[2].cob_id = 0x280 + self.node_id
-            self.node.tpdo[2].trans_type = 1
-            self.node.tpdo[2].event_timer = 0
-            self.node.tpdo[2].enabled = True
+        # 쓰기 : 토크 목표값
+        self.node.rpdo[2].clear() 
+        self.node.rpdo[2].add_variable('Controlword')
+        self.node.rpdo[2].add_variable('Target torque') #0x6071 
+        self.node.rpdo[2].cob_id = 0x300 + self.node_id
+        self.node.rpdo[2].trans_type = 0  # 즉시 적용
+        #self.node.rpdo[1].event_timer = 255   # 이벤트 타이머 비활성화
+        self.node.rpdo[2].enabled = True
 
-            # motor <- master
-            # 쓰기 : 토크 목표값
-            self.node.rpdo[1].clear() 
-            self.node.rpdo[1].add_variable('Controlword')
-            self.node.rpdo[1].add_variable('Target torque') #0x6071 
-            self.node.rpdo[1].cob_id = 0x200 + self.node_id
-            self.node.rpdo[1].trans_type = 0  # 즉시 적용
-            #self.node.rpdo[1].event_timer = 255   # 이벤트 타이머 비활성화
-            self.node.rpdo[1].enabled = True
-
-            self.motor_rated_current = self.node.sdo['Motor rated current'].raw #0x6075 모터 정격 전류 mA
-            print(f'[read] Motor rated current: {self.motor_rated_current}')
+        self.motor_rated_current = self.node.sdo['Motor rated current'].raw #0x6075 모터 정격 전류 mA
+        print(f'[read] Motor rated current: {self.motor_rated_current}')
         
         # Save new configuration (node must be in pre-operational)
         self.node.nmt.state = 'PRE-OPERATIONAL'
         self.node.tpdo.save()
         self.node.rpdo.save()
 
-        #self.node.rpdo[1].period = 0.1  # 100ms
-        #self.node.rpdo[1].start()
         # Start remote node
         self.node.nmt.state = 'OPERATIONAL'
         pass
