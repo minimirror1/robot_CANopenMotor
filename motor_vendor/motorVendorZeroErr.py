@@ -1,5 +1,8 @@
 from abstract_motor import AbstractMotor
 import time
+import csv
+from datetime import datetime
+
 class MotorVendorZeroErr(AbstractMotor):
     """제조사 A 모터에 대한 구체 구현."""
     PULSE_PER_REVOLUTION = 524288  # 한 바퀴당 펄스 수
@@ -56,6 +59,26 @@ class MotorVendorZeroErr(AbstractMotor):
         self.node.sdo[0x6040].raw = 0x80  # 에러 클리어
         time.sleep(0.1)
         pass
+
+    def log_start(self):
+        """로그 시작"""
+        self.logging = True
+        self.start_time = time.time()
+        
+        # 현재 시간을 이용한 파일명 생성
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.log_filename = f"motor_log_{self.node_id}_{timestamp}.csv"
+        
+        # CSV 파일 생성 및 헤더 작성
+        self.log_file = open(self.log_filename, 'w', newline='')
+        self.csv_writer = csv.writer(self.log_file)
+        self.csv_writer.writerow(['Time(ms)', 'Position(rad)', 'Torque(Nm)', 'Velocity(rad/s)', 'Acceleration(rad/s^2)'])
+
+    def log_stop(self):
+        """로그 종료"""
+        if hasattr(self, 'logging') and self.logging:
+            self.logging = False
+            self.log_file.close()
 
     def pdo_mapping(self):
         print(f"[MotorVendorZeroErr] PDO mapping for node: {self.node_id}")
@@ -219,6 +242,17 @@ class MotorVendorZeroErr(AbstractMotor):
         self.current_acceleration = (self.current_velocity - self.current_velocity_old) / self.dt
         self.current_velocity_old = self.current_velocity
         #print(f'TPDO2 Acceleration: {self.current_acceleration} rad/s^2')
+
+        # 로깅이 활성화된 경우 데이터 저장
+        if hasattr(self, 'logging') and self.logging:
+            current_time = (time.time() - self.start_time) * 1000  # ms 단위로 변환
+            self.csv_writer.writerow([
+                f"{current_time:.1f}",
+                f"{self.current_position:.6f}",
+                f"{self.current_torque_sensor:.6f}",
+                f"{self.current_velocity:.6f}",
+                f"{self.current_acceleration:.6f}"
+            ])
 
     def set_velocity(self, value):
         """모터 속도 명령"""

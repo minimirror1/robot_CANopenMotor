@@ -151,3 +151,27 @@ class MotorController:
         """네트워크 해제"""
         self.network.sync.stop()
         self.network.disconnect()
+
+    def log_start_all(self):
+        """모든 모터의 로그 기록 시작"""
+        for node_id, motor in self.motors.items():
+            motor.log_start()
+
+    def log_stop_all(self):
+        """모든 모터의 로그 기록 종료"""
+        for node_id, motor in self.motors.items():
+            motor.log_stop()
+
+    def log_start(self, node_id):
+        """특정 모터의 로그 기록 시작"""
+        if node_id in self.motors:
+            self.motors[node_id].log_start()
+        else:
+            print(f"Node {node_id} not found in motors dictionary.")
+
+    def log_stop(self, node_id):
+        """특정 모터의 로그 기록 종료"""
+        if node_id in self.motors:
+            self.motors[node_id].log_stop()
+        else:
+            print(f"Node {node_id} not found in motors dictionary.")

@@ -76,12 +76,10 @@ def main():
     # 동기화 시작
     controller.sync_start(0.01)
     
-    # 위치 설정    
-    # controller.set_position_all(0)
-
-    # time.sleep(5)
-
-    # controller.set_torque(1, 500)
+    # 로그 기록 시작
+    controller.log_start(TEST_ID)
+    
+    # 토크 설정
     controller.set_torque(TEST_ID, 200)
     cnt = 0
     try:
@@ -95,6 +93,8 @@ def main():
             cnt += 1
     except KeyboardInterrupt:
         controller.set_torque(TEST_ID, 0)
+        # 로그 기록 종료
+        controller.log_stop(TEST_ID)
         print("\n프로그램을 종료합니다...")
     
     # 종료 전 네트워크 해제

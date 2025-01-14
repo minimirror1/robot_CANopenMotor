@@ -111,4 +111,14 @@ class AbstractMotor(ABC):
         """모터 가속도 확인"""
         pass
 
+    @abstractmethod
+    def log_start(self):
+        """로그 기록 시작"""
+        pass
+
+    @abstractmethod
+    def log_stop(self):
+        """로그 기록 종료"""
+        pass
+
 
