@@ -33,7 +33,11 @@
 
 ### 1. 모터 초기화
 ```python
+# PCAN 의 경우
 controller = MotorController(channel='can0', bustype='socketcan', bitrate=1000000)
+# USB-CAN 의 경우
+controller = MotorController(interface='slcan', channel='COM3', bitrate=1000000)
+
 motorA = MotorFactory.create_motor("VendorZeroErr", 1, "config/ZeroErr Driver_V1.5.eds", zero_offset=84303)
 controller.add_motor(motorA)
 ```

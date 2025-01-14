@@ -7,14 +7,18 @@ class MotorController:
     하나의 CAN Bus 상에서 여러 모터(Node)를 관리하는 컨트롤러.
     예시: USB-CAN 장치와 연결하고, 제조사별 Motor 객체 등록/호출 등.
     """
-    def __init__(self, channel='can0', bustype='socketcan', bitrate=1000000):
+    def __init__(self, channel='can0', bustype='socketcan', bitrate=1000000, interface=None):
         """
-        :param channel: 예) 'can0', 'pcan0', 'usb0' 등
+        :param channel: 예) 'can0', 'pcan0', 'usb0' 또는 'COM3' 등
         :param bustype: canopen 또는 python-can에서 사용하는 bustype 설정
         :param bitrate: CAN Bus 속도
+        :param interface: slcan 등의 인터페이스 타입. 설정 시 bustype 대신 사용됨
         """
         self.network = canopen.Network()
-        self.network.connect(channel=channel, bustype=bustype, bitrate=bitrate)
+        if interface is None:
+            self.network.connect(channel=channel, bustype=bustype, bitrate=bitrate)
+        else:
+            self.network.connect(interface=interface, channel=channel, bitrate=bitrate)
         # 등록된 모터 리스트/딕셔너리
         self.motors = {}
 

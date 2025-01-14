@@ -9,6 +9,8 @@ from motor_controller import MotorController
 
 import random
 
+TEST_ID = 1
+
 # 1 84,303
 # 2 78,500
 # 3 69,238
@@ -37,7 +39,7 @@ def main():
     controller = MotorController(channel='can0', bustype='socketcan', bitrate=1000000)
 
     # 예시: 모터 생성(제조사별)
-    motorA = MotorFactory.create_motor("VendorZeroErr", 1, "config/ZeroErr Driver_V1.5.eds", zero_offset=84303, operation_mode='PROFILE_TORQUE')
+    motorA = MotorFactory.create_motor("VendorZeroErr", TEST_ID, "config/ZeroErr Driver_V1.5.eds", zero_offset=84303, operation_mode='PROFILE_TORQUE')
     #motorB = MotorFactory.create_motor("VendorZeroErr", 2, "config/ZeroErr Driver_V1.5.eds", zero_offset=78500, operation_mode='PROFILE_POSITION')
     #motorC = MotorFactory.create_motor("VendorZeroErr", 3, "config/ZeroErr Driver_V1.5.eds", zero_offset=69238, operation_mode='PROFILE_POSITION')
     #motorD = MotorFactory.create_motor("VendorZeroErr", 4, "config/ZeroErr Driver_V1.5.eds", zero_offset=81038)
@@ -79,19 +81,19 @@ def main():
     # time.sleep(5)
 
     # controller.set_torque(1, 500)
-    controller.set_torque(1, 200)
+    controller.set_torque(TEST_ID, 200)
     cnt = 0
     try:
         while True:
             time.sleep(0.01)
             
             if cnt % 100 == 0:
-                print(f"Torque: {controller.get_torque(1)}")
-                print(f"Velocity: {controller.get_velocity(1)}")
-                print(f"Acceleration: {controller.get_acceleration(1)}")
+                print(f"Torque: {controller.get_torque(TEST_ID)}")
+                print(f"Velocity: {controller.get_velocity(TEST_ID)}")
+                print(f"Acceleration: {controller.get_acceleration(TEST_ID)}")
             cnt += 1
     except KeyboardInterrupt:
-        controller.set_torque(1, 0)
+        controller.set_torque(TEST_ID, 0)
         print("\n프로그램을 종료합니다...")
     
     # 종료 전 네트워크 해제
