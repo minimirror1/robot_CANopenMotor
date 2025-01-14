@@ -37,6 +37,7 @@ def is_position_reached(current_pos, target_pos, tolerance=10):
 def main():
     # 예시: CAN Bus controller 생성
     controller = MotorController(channel='can0', bustype='socketcan', bitrate=1000000)
+    #controller = MotorController(interface='slcan', channel='COM3', bitrate=1000000)
 
     # 예시: 모터 생성(제조사별)
     motorA = MotorFactory.create_motor("VendorZeroErr", TEST_ID, "config/ZeroErr Driver_V1.5.eds", zero_offset=84303, operation_mode='PROFILE_TORQUE')
