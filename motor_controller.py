@@ -1,6 +1,6 @@
 import canopen
 import time
-from abstract_motor import AbstractMotor
+from .abstract_motor import AbstractMotor
 
 class MotorController:
     """
