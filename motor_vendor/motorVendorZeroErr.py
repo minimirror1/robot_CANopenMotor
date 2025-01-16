@@ -1,4 +1,4 @@
-from ..motor_management.abstract_motor import AbstractMotor
+from motor_management.abstract_motor import AbstractMotor
 import time
 import csv
 from datetime import datetime
