@@ -84,7 +84,7 @@ def main():
 
             current_time = cnt * 0.01
             current_value = get_wave_data(current_time)
-            controller.set_position(TEST_ID, int(current_value))
+            #controller.set_position(TEST_ID, int(current_value))
             
             if cnt % 100 == 0:
                 print(f"Torque: {controller.get_torque(TEST_ID)}")
