@@ -38,9 +38,9 @@ class MotorVendorZeroErr(AbstractMotor):
     def _init_mode_specific_parameters(self):
         """모드별 특정 파라미터 초기화"""
         if self.operation_mode == 'PROFILE_POSITION':
-            self.node.sdo['Profile velocity'].raw = 262144 #0x6081
-            self.node.sdo['Profile acceleration'].raw = 262144 #0x6083
-            self.node.sdo['Profile deceleration'].raw = 262144 #0x6084
+            self.node.sdo['Profile velocity'].raw = 524288 #0x6081
+            self.node.sdo['Profile acceleration'].raw = 2621440 #0x6083
+            self.node.sdo['Profile deceleration'].raw = 2621440 #0x6084
             print(f'[write] Profile parameters set for Position mode')
             
         elif self.operation_mode == 'PROFILE_TORQUE':
@@ -170,13 +170,13 @@ class MotorVendorZeroErr(AbstractMotor):
         self.node.tpdo[2].add_callback(self.tpdo2_callback)
 
     def set_position(self, value):
-        print(f"[MotorVendorZeroErr] Set position to {value}, node: {self.node_id}")
+        #print(f"[MotorVendorZeroErr] Set position to {value}, node: {self.node_id}")
         self.node.rpdo[1]['Controlword'].phys = 0x2f
         self.target_position = value + self.zero_offset
         self.node.rpdo[1]['Target Position'].phys = self.target_position
         self.node.rpdo[1].transmit()
 
-        print(f"myzero_offset {self.zero_offset} , target_position {self.target_position}")
+        #print(f"myzero_offset {self.zero_offset} , target_position {self.target_position}")
 
         self.node.rpdo[1]['Controlword'].phys = 0x3f
         self.node.rpdo[1].transmit()        

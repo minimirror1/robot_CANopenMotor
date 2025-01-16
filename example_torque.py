@@ -1,15 +1,16 @@
 import canopen
+import serial
 import time
 import math
 from motor_management.abstract_motor import AbstractMotor
 
-from motor_factory import MotorFactory
+from motor_management.motor_factory import MotorFactory
 from motor_management.motor_controller import MotorController
 
 
 import random
 
-TEST_ID = 1
+TEST_ID = 11
 
 # 1 84,303
 # 2 78,500
@@ -20,8 +21,8 @@ def get_wave_data(current_time):
     # frequency: Hz (주파수)s
     # amplitude: 진폭
     # offset: 오프셋
-    frequency = 0.1  # 60Hz
-    amplitude = 50000
+    frequency = 1   # 60Hz
+    amplitude = 65536
     offset = 0
     
     # 실시간으로 사인파 계산
@@ -36,8 +37,10 @@ def is_position_reached(current_pos, target_pos, tolerance=10):
 
 def main():
     # 예시: CAN Bus controller 생성
-    controller = MotorController(channel='can0', bustype='socketcan', bitrate=1000000)
+    #controller = MotorController(channel='can0', bustype='socketcan', bitrate=1000000)
     #controller = MotorController(interface='slcan', channel='COM3', bitrate=1000000)
+    controller = MotorController(interface='slcan', channel='/dev/ttyACM0', bitrate=1000000)
+    
 
     # 예시: 모터 생성(제조사별)
     #motorA = MotorFactory.create_motor("VendorZeroErr", TEST_ID, "config/ZeroErr Driver_V1.5.eds", zero_offset=84303, operation_mode='PROFILE_TORQUE')
@@ -63,13 +66,17 @@ def main():
    
     # 동기화 시작
     controller.sync_start(0.01)
-    
+
+
+    controller.set_position(TEST_ID, 0)
+
+    time.sleep(2)
     # 로그 기록 시작
     controller.log_start(TEST_ID)
     
     # 토크 설정
     #controller.set_torque(TEST_ID, 200)
-    controller.set_position(TEST_ID, 0)
+
     cnt = 0
     try:
         while True:

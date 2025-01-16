@@ -3,7 +3,7 @@ import time
 import math
 from motor_management.abstract_motor import AbstractMotor
 
-from motor_factory import MotorFactory
+from motor_management.motor_factory import MotorFactory
 from motor_management.motor_controller import MotorController
 
 
